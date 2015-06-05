@@ -89,7 +89,11 @@ module.exports = function (source) {
       // Add :parentId filter in case URL is like /:parent/:parentId/:resource
       if (req.params.parent) {
         var parent = pluralize.singular(req.params.parent)
-        filters[parent + 'Id'] = +req.params.parentId
+        if (isNaN(req.params.parentId)) {
+          filters[parent + 'Id'] = req.params.parentId
+        } else {
+          filters[parent + 'Id'] = +req.params.parentId
+        }
       }
 
       // Add query parameters filters
@@ -139,7 +143,11 @@ module.exports = function (source) {
       array = array.slice(_start, _start + _limit)
     }
 
-    res.jsonp(array)
+    if (db.object.returnObject) {
+      res.jsonp(array[0])
+    } else {
+      res.jsonp(array)
+    }
   }
 
   // GET /:resource/:id

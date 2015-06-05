@@ -32,6 +32,14 @@ describe('Server', function () {
       {id: 5, published: false, postId: 2}
     ]
 
+    db.bmx = [
+      {id: 'videos'}
+    ]
+
+    db.hd = [
+      {id: 1, hd: true, bmxId: 'videos'}
+    ]
+
     db.refs = [
       {id: 'abcd-1234', url: 'http://example.com', postId: 1}
     ]
@@ -77,6 +85,17 @@ describe('Server', function () {
         .get('/comments?postId=1&published=true')
         .expect('Content-Type', /json/)
         .expect([db.comments[0]])
+        .expect(200, done)
+    })
+  })
+
+  describe('GET /:resource?attr=&attr=', function () {
+    it('should respond with json and filter resources inside an object not array', function (done) {
+      db.returnObject = true
+      request(server)
+        .get('/comments?postId=1&published=true')
+        .expect('Content-Type', /json/)
+        .expect(db.comments[0])
         .expect(200, done)
     })
   })
@@ -170,6 +189,17 @@ describe('Server', function () {
           db.comments[0],
           db.comments[1]
         ])
+        .expect(200, done)
+    })
+
+    it('should respond with json and corresponding nested resources even if parent Id is string', function (done) {
+      db.returnObject = true
+      request(server)
+        .get('/bmx/videos/hd')
+        .expect('Content-Type', /json/)
+        .expect(
+          db.hd[0]
+        )
         .expect(200, done)
     })
   })
@@ -350,4 +380,5 @@ describe('Server', function () {
       assert(router.db.object)
     })
   })
+
 })
